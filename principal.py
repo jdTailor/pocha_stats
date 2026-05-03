@@ -5,6 +5,33 @@ from datetime import datetime
 # Configuración de la página
 st.set_page_config(page_title="Pocha Stats", layout="centered")
 
+# --- CONTROL DE ACCESO (OPCIÓN 1) ---
+def check_password():
+    """Devuelve True si el usuario introdujo la contraseña correcta."""
+    def password_entered():
+        """Comprueba si la contraseña coincide."""
+        if st.session_state["password_input"] == st.secrets["password"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password_input"]  # Eliminar contraseña de session_state
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # Pantalla inicial de login
+        st.text_input(
+            "Introduce la contraseña para entrar", 
+            type="password", 
+            on_change=password_entered, 
+            key="password_input"
+        )
+        if "password_correct" in st.session_state and not st.session_state["password_correct"]:
+            st.error("😕 Contraseña incorrecta")
+        return False
+    return True
+
+if not check_password():
+    st.stop()  # Detiene la ejecución si no hay contraseña correcta
+
 # --- PERSISTENCIA TEMPORAL (Session State) ---
 if 'historico' not in st.session_state:
     st.session_state.historico = pd.DataFrame(columns=[
